@@ -1,7 +1,8 @@
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 import flet
-from flet import ThemeMode, Text, Button, TextField, OutlinedButton, Column, CrossAxisAlignment
+from flet import ThemeMode, Text, Button, TextField, OutlinedButton, Column, CrossAxisAlignment, Container, Colors, \
+    FontWeight
 from flet.controls import page
 from flet.controls.border_radius import horizontal
 
@@ -47,7 +48,7 @@ def main(page: flet.Page):
     numero = Text()
     texto_parimpar = Text('Insira um número para saber se ele é impar ou par')
     input_numero = TextField(label="Numero")
-    btn_calcular = OutlinedButton("Calcular", on_click=par_impar)
+    btn_calcular = OutlinedButton("Verificar", on_click=par_impar)
 
     idade = Text()
     texto_data = Text('Insira sua data de nascimento')
@@ -58,18 +59,56 @@ def main(page: flet.Page):
     page.add(
         Column(
             [
-                input_nome,
-                input_sobrenome,
-                btn_salvar,
-                text,
-                texto_parimpar,
-                input_numero,
-                btn_calcular,
-                numero,
-                texto_data,
-                input_data,
-                btn_calcular_idade,
-                idade
+                Container(
+                    Column(
+                        [
+                            Text("Atividade 1", weight=FontWeight.BOLD, size=24),
+                            input_nome,
+                            input_sobrenome,
+                            btn_salvar,
+                            text,
+                        ],
+                        horizontal_alignment=CrossAxisAlignment.CENTER,
+                    ),
+                    bgcolor=Colors.BLUE_700,
+                    padding=15,
+                    border_radius=10,
+                    width=400,
+                ),
+                Container(
+                    Column(
+                        [
+                            Text("Atividade 2", weight=FontWeight.BOLD, size=24),
+                            texto_parimpar,
+                            input_numero,
+                            btn_calcular,
+                            numero,
+                        ],
+                        horizontal_alignment=CrossAxisAlignment.CENTER,
+                    ),
+                    bgcolor=Colors.BLUE_700,
+                    padding=15,
+                    border_radius=10,
+                    width=400,
+                ),
+                Container(
+                    Column(
+                        [
+                            Text("Atividade 3", weight=FontWeight.BOLD, size=24),
+                            texto_data,
+                            input_data,
+                            btn_calcular_idade,
+                            idade,
+                        ],
+                        horizontal_alignment=CrossAxisAlignment.CENTER,
+                    ),
+                    bgcolor=Colors.BLUE_700,
+                    padding=15,
+                    border_radius=10,
+                    width=400,
+                ),
+
+
 
             ],
             horizontal_alignment=CrossAxisAlignment.CENTER
@@ -78,4 +117,4 @@ def main(page: flet.Page):
 
 
 
-flet.app(main)
+flet.run(main)
