@@ -2,7 +2,8 @@ import asyncio
 
 import flet
 from flet import ThemeMode, Text, Button, TextField, OutlinedButton, Column, CrossAxisAlignment, Container, Colors, \
-    FontWeight, View, AppBar, Icon
+    FontWeight, View, AppBar, Icon, ListView, ListTile, PopupMenuButton, PopupMenuItem, FloatingActionButton
+from flet.controls.core import list_view
 from flet.controls.material.icons import Icons
 from sqlalchemy import select
 
@@ -15,6 +16,8 @@ def main(page: flet.Page):
     page.theme_mode = ThemeMode.DARK
     page.window.width = 400
     page.window.height = 700
+
+    lista_dados = []
 
     # Funções
 
@@ -88,11 +91,11 @@ def main(page: flet.Page):
 
             navegar("/")
 
-    def buscar_personagem():
+    def buscar_personagem(id):
         db = SessionLocalExemplo()
         try:
             stmt = select(Personagem)
-            personagem = db.execute(stmt).first()  # .scalars().all() para obter uma lista de objetos
+            personagem = db.execute(stmt).one_or_none()  # .scalars().all() para obter uma lista de objetos
             mostrar_nome_text.value = personagem.nome
             mostrar_universo_text.value = personagem.universo
             mostrar_forca_text.value = personagem.forca
@@ -103,6 +106,37 @@ def main(page: flet.Page):
         finally:
             db.close()
 
+    def montar_lista_personagens():
+        list_view.controls.clear()
+
+        db = SessionLocalExemplo()
+        try:
+            stmt = select(Personagem)
+            personagens = db.execute(stmt).scalars().all()  # .scalars().all() para obter uma lista de objetos
+
+            for item in personagens:
+                list_view.controls.append(
+                    ListTile(
+                        leading=Icon(Icons.PERSON, color=Colors.BLUE),
+                        title=item.nome,
+                        subtitle=item.poder,
+                        trailing=PopupMenuButton(
+                            icon=Icons.MORE_VERT,
+                            items=[
+                                PopupMenuItem("Ver Detalhes", icon=Icons.REMOVE_RED_EYE),
+                                PopupMenuItem("Excluir", icon=Icons.DELETE, on_click=lambda: excluir(item)),
+                            ]
+                        ),
+
+                    )
+                )
+        finally:
+            db.close()
+
+    def excluir(item):
+        lista_dados.remove(item)
+        montar_lista_personagens()
+
     # Navegar
     def navegar(route):
         asyncio.create_task(
@@ -112,67 +146,54 @@ def main(page: flet.Page):
     # Gerenciar as telas(routes)
     def route_change():
         page.views.clear()
+
+        montar_lista_personagens()
+
         page.views.append(
             View(
-                route="/primeira_tela",
+                route="/",
                 controls=[
-                    AppBar(
-                        title="Cadastro",
-                        bgcolor=Colors.DEEP_PURPLE_700
-                    ),
-                    cadastrar_text,
-                    input_nome,
-                    input_universo,
-                    input_nivelforca,
-                    input_niveldurabilidade,
-                    input_nivelvelocidade,
-                    input_poder,
-                    btn_salvar_tudo,
+                    Container(
+                        Column([
+                            AppBar(
+                                title="Lista de personagens",
+                                bgcolor=Colors.DEEP_PURPLE_700
+                            ),
 
-                ]
-            )
+        list_view,
+
+        ],
+        horizontal_alignment = CrossAxisAlignment.CENTER,
+        ),
+        bgcolor = Colors.DEEP_PURPLE_700,
+        padding = 15,
+        border_radius = 10,
+        width = 400,
+        ),
+
+        ],
+                floating_action_button=FloatingActionButton(
+                    icon=Icons.ADD,
+                    on_click=lambda: navegar("/primeira_tela")),
         )
-        if page.route == "/":
-            buscar_personagem()
+        ),
+        if page.route == "/primeira_tela":
             page.views.append(
                 View(
-                    route="/",
+                    route="/primeira_tela",
                     controls=[
-                        Container(
-                            Column([
-                                AppBar(
-                                    title="Lista de personagens",
-                                    bgcolor=Colors.DEEP_PURPLE_700
-                                ),
-                                Button("fazer cadastro", on_click=lambda: navegar("/primeira_tela")),
-
-                                flet.Row([Icon(Icons.PERSON, color=Colors.BLUE_700, size=20),
-                                          mostrar_nome_text, ]
-                                         ),
-                                flet.Row([Icon(Icons.HOUSE, color=Colors.BLUE_700, size=20),
-                                          mostrar_universo_text, ]
-                                         ),
-                                flet.Row([Icon(Icons.POWER_ROUNDED, color=Colors.BLUE_700, size=20),
-                                          mostrar_forca_text, ]
-                                         ),
-                                flet.Row([Icon(Icons.WALLET, color=Colors.BLUE_700, size=20),
-                                          mostrar_durabilidade_text, ]
-                                         ),
-                                flet.Row([Icon(Icons.SPEED, color=Colors.BLUE_700, size=20),
-                                          mostrar_velocidade_text, ]
-                                         ),
-                                flet.Row([Icon(Icons.BATTERY_1_BAR_ROUNDED, color=Colors.BLUE_700, size=20),
-                                          mostrar_poder_text, ]
-                                         )
-                            ],
-                                horizontal_alignment=CrossAxisAlignment.CENTER,
-                            ),
-                            bgcolor=Colors.DEEP_PURPLE_700,
-                            padding=15,
-                            border_radius=10,
-                            width=400,
+                        AppBar(
+                            title="Cadastro",
+                            bgcolor=Colors.DEEP_PURPLE_700
                         ),
-
+                        cadastrar_text,
+                        input_nome,
+                        input_universo,
+                        input_nivelforca,
+                        input_niveldurabilidade,
+                        input_nivelvelocidade,
+                        input_poder,
+                        btn_salvar_tudo,
 
                     ]
                 )
@@ -196,6 +217,7 @@ def main(page: flet.Page):
     btn_salvar_tudo = OutlinedButton("Salvar", on_click=salvar_tudo)
 
     # pag 2
+    list_view = ListView(height=500)
     mostrar_nome_text = Text()
     mostrar_universo_text = Text()
     mostrar_forca_text = Text()
