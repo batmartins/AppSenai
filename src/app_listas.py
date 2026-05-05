@@ -64,7 +64,7 @@ def main(page: flet.Page):
                         trailing=PopupMenuButton(
                             icon=Icons.MORE_VERT,
                             items=[
-                                PopupMenuItem("Ver Detalhes", icon=Icons.REMOVE_RED_EYE),
+                                PopupMenuItem("Ver Detalhes", icon=Icons.REMOVE_RED_EYE, on_click=lambda _, pessoa=item: ver_detalhes(pessoa)),
                                 PopupMenuItem("Excluir", icon=Icons.DELETE, on_click=lambda: excluir(item)),
                             ]
                         ),
@@ -73,6 +73,13 @@ def main(page: flet.Page):
                 )
         finally:
             db.close()
+
+    def ver_detalhes(pessoa):
+        mostrar_nome_text.value = pessoa.nome
+        mostrar_profissao_text.value = pessoa.profissao
+        mostrar_sexo_text.value = pessoa.sexo
+
+        navegar("/detalhes")
 
     def salvar_dados():
         nome = input_nome.value.strip()
@@ -205,6 +212,21 @@ def main(page: flet.Page):
                         input_sexo,
                         input_profissao,
                         btn_salvar,
+                    ]
+                )
+            )
+        elif page.route == "/detalhes":
+            page.views.append(
+                View(
+                    route="/detalhes",
+                    controls=[
+                        flet.AppBar(
+                            title="Detalhes",
+                        ),
+                        mostrar_nome_text,
+                        mostrar_sexo_text,
+                        mostrar_profissao_text,
+
                     ]
                 )
             )

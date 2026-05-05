@@ -2,7 +2,8 @@ import asyncio
 
 import flet
 from flet import ThemeMode, Text, Button, TextField, OutlinedButton, Column, CrossAxisAlignment, Container, Colors, \
-    FontWeight, View, AppBar, Icon, ListView, ListTile, PopupMenuButton, PopupMenuItem, FloatingActionButton
+    FontWeight, View, AppBar, Icon, ListView, ListTile, PopupMenuButton, PopupMenuItem, FloatingActionButton, Row, \
+    BorderRadius, Alignment, TextAlign, Divider
 from flet.controls.core import list_view
 from flet.controls.material.icons import Icons
 from sqlalchemy import select
@@ -94,14 +95,20 @@ def main(page: flet.Page):
     def buscar_personagem(id):
         db = SessionLocalExemplo()
         try:
-            stmt = select(Personagem)
-            personagem = db.execute(stmt).one_or_none()  # .scalars().all() para obter uma lista de objetos
-            mostrar_nome_text.value = personagem.nome
-            mostrar_universo_text.value = personagem.universo
-            mostrar_forca_text.value = personagem.forca
-            mostrar_durabilidade_text.value = personagem.durabilidade
-            mostrar_velocidade_text.value = personagem.velocidade
-            mostrar_poder_text.value = personagem.poder
+            stmt = select(Personagem).where(Personagem.id == id)
+            personagem = db.execute(stmt).scalar_one_or_none()  # .scalars().all() para obter uma lista de objetos
+
+            print(type(personagem))
+            if personagem:
+                mostrar_nome_text.value = f'Nome: {personagem.nome}'
+                mostrar_universo_text.value = f'Universo: {personagem.universo}'
+                mostrar_forca_text.value = f'Força: {personagem.forca}'
+                mostrar_durabilidade_text.value = f'Durabilidade: {personagem.durabilidade}'
+                mostrar_velocidade_text.value = f'Velocidade: {personagem.velocidade}'
+                mostrar_poder_text.value = f'Poder: {personagem.poder}'
+
+                navegar("/detalhes")
+
 
         finally:
             db.close()
@@ -123,7 +130,7 @@ def main(page: flet.Page):
                         trailing=PopupMenuButton(
                             icon=Icons.MORE_VERT,
                             items=[
-                                PopupMenuItem("Ver Detalhes", icon=Icons.REMOVE_RED_EYE),
+                                PopupMenuItem("Ver Detalhes", icon=Icons.REMOVE_RED_EYE, on_click=lambda _, personagem=item: buscar_personagem(personagem.id)),
                                 PopupMenuItem("Excluir", icon=Icons.DELETE, on_click=lambda: excluir(item)),
                             ]
                         ),
@@ -165,7 +172,7 @@ def main(page: flet.Page):
         ],
         horizontal_alignment = CrossAxisAlignment.CENTER,
         ),
-        bgcolor = Colors.DEEP_PURPLE_700,
+        bgcolor = Colors.BLACK,
         padding = 15,
         border_radius = 10,
         width = 400,
@@ -184,7 +191,7 @@ def main(page: flet.Page):
                     controls=[
                         AppBar(
                             title="Cadastro",
-                            bgcolor=Colors.DEEP_PURPLE_700
+                            bgcolor=Colors.BLACK
                         ),
                         cadastrar_text,
                         input_nome,
@@ -194,6 +201,72 @@ def main(page: flet.Page):
                         input_nivelvelocidade,
                         input_poder,
                         btn_salvar_tudo,
+
+                    ]
+                )
+            )
+        elif page.route == "/detalhes":
+            page.views.append(
+                View(
+                    route="/detalhes",
+                    controls=[
+                        flet.AppBar(
+                            title="Detalhes",
+                        ),
+                        Container(
+                            Column([
+                                Row([
+                                mostrar_nome_text,
+                                ],
+                                    height=30,
+                                    width=300
+                                ),
+                                Divider(),
+                                Row([
+                                    mostrar_universo_text,
+
+                                ],
+                                height=20,
+                                width=300
+                                ),
+                                Divider(),
+                                Row([
+                                    mostrar_forca_text,
+                                ],
+                                height=20,
+                                width=300
+                                ),
+                                Divider(),
+                                Row([
+                                    mostrar_durabilidade_text,
+                                ],
+                                    height=20,
+                                width=300
+                                ),
+                                Divider(),
+                                Row([
+                                    mostrar_velocidade_text,
+                                ],
+                                    height=20,
+                                width=300
+                                ),
+                                Divider(),
+                                Row([
+                                    mostrar_poder_text,
+                                ],
+                                    height=20,
+                                width=300
+                                ),
+                            ],
+                            width=300,
+
+                            ),
+                            bgcolor=Colors.GREY_700,
+                            border_radius=BorderRadius.all(5),
+                            align=Alignment.CENTER,
+                            height=340,
+                            width=300
+                        ),
 
                     ]
                 )
@@ -218,12 +291,12 @@ def main(page: flet.Page):
 
     # pag 2
     list_view = ListView(height=500)
-    mostrar_nome_text = Text()
-    mostrar_universo_text = Text()
-    mostrar_forca_text = Text()
-    mostrar_durabilidade_text = Text()
-    mostrar_velocidade_text = Text()
-    mostrar_poder_text = Text()
+    mostrar_nome_text = Text(text_align=TextAlign.CENTER,width=300, height=40)
+    mostrar_universo_text = Text(text_align=TextAlign.CENTER,width=300)
+    mostrar_forca_text = Text(text_align=TextAlign.CENTER,width=300)
+    mostrar_durabilidade_text = Text(text_align=TextAlign.CENTER,width=300)
+    mostrar_velocidade_text = Text(text_align=TextAlign.CENTER,width=300)
+    mostrar_poder_text = Text(text_align=TextAlign.CENTER,width=300)
 
     # Eventos
     page.on_route_change = route_change

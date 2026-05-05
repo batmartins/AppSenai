@@ -23,5 +23,8 @@ class Personagem(Base):
     velocidade = Column(String, nullable=False)
     poder = Column(String, nullable=False)
 
+    def __repr__(self):
+        return f"{self.nome}, {self.universo}, {self.forca}, {self.durabilidade}"
+
 
 Base.metadata.create_all(engine)  # Cria as tabelas
